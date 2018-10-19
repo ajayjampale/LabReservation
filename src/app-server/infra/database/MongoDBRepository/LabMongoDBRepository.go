@@ -25,20 +25,6 @@ func (r *LabMongoDBRepository) GetDatabaseHandle() (*mgo.Database, error) {
 	}
 }
 
-func (r *LabMongoDBRepository) GetResources() models.Resources {
-
-	return nil
-}
-
-func (r *LabMongoDBRepository) GetResourceDetail(ResourceName string) models.Resource {
-	var res models.Resource
-	return res
-}
-
-func (r *LabMongoDBRepository) AddResource(Resource models.Resource) error {
-	return nil
-}
-
 func (r *LabMongoDBRepository) GetResourceType(resourceType string) (models.ResourceType, error) {
 	DB, err := r.GetDatabaseHandle()
 
@@ -68,7 +54,6 @@ func (r *LabMongoDBRepository) GetResourceTypes() ([]models.ResourceType, error)
 	return results, nil
 }
 
-
 func (r *LabMongoDBRepository) GetChildResourceTypes(resourceType string) ([]models.ResourceType, error) {
 	var err error
 
@@ -91,6 +76,41 @@ func (r *LabMongoDBRepository) GetChildResourceTypes(resourceType string) ([]mod
 
 }
 
+func (r *LabMongoDBRepository) GetChildResourceTypesOfParentType(parentTypeIDArray []string) ([]models.ResourceType, error) {
+	DB, err := r.GetDatabaseHandle()
+
+	results := []models.ResourceType{}
+	if err1 := DB.C(models.CollectionResourceType).Find(bson.M{"parenttypeid": bson.M{"$in":parentTypeIDArray}}).Sort("+type").All(&results); err1 != nil {
+		return nil, err1
+	}
+	return results, err
+}
+
+func (r *LabMongoDBRepository) GetRecurseChildResourceTypes(resourceType string) ([]models.ResourceType, error) {
+	var err error
+
+	var resType models.ResourceType
+	if resType, err = r.GetResourceType(resourceType); err != nil {
+		return nil, err
+	}
+
+	results := []models.ResourceType{}
+	results = append(results, resType)
+
+	parentTypeArray := []string{resType.ID}
+
+	for (len(parentTypeArray) != 0) {
+		resTypes, err := r.GetChildResourceTypesOfParentType(parentTypeArray)
+		parentTypeArray = parentTypeArray[:0]
+		if err == nil {
+			for _,resType := range resTypes {
+				results = append(results, resType)
+				parentTypeArray = append(parentTypeArray, resType.ID)
+			}
+		}
+	}
+	return results, err
+}
 
 func (r *LabMongoDBRepository) AddResourceType(resourceType models.ResourceType) error {
 	DB, err := r.GetDatabaseHandle()
@@ -113,6 +133,100 @@ func (r *LabMongoDBRepository) DeleteAllResourceTypes() error {
 	_, err = DB.C(models.CollectionResourceType).RemoveAll(nil)
 
 	return err
+}
+
+func (r *LabMongoDBRepository) GetResources() (models.Resources, error) {
+
+	DB, err := r.GetDatabaseHandle()
+
+	if err != nil {
+		return nil, err
+	}
+
+	results := models.Resources{}
+	if err1 := DB.C(models.CollectionResource).Find(nil).Sort("+name").All(&results); err1 != nil {
+		return nil, err1
+	}
+
+	return results, nil
+
+}
+func (r *LabMongoDBRepository) GetResourcesInLab(labname string) (models.Resources, error) {
+
+	DB, err := r.GetDatabaseHandle()
+
+	if err != nil {
+		return nil, err
+	}
+
+	results := models.Resources{}
+	if err1 := DB.C(models.CollectionResource).Find( bson.M{"infos.lab" : labname} ).Sort("+name").All(&results); err1 != nil {
+		return nil, err1
+	}
+
+	return results, nil
+
+}
+func (r *LabMongoDBRepository) GetResourcesByType (resourceType string) (models.Resources, error) {
+	DB, err := r.GetDatabaseHandle()
+	if err != nil {
+		return nil, err
+	}
+
+	resourceTypeArr, err := r.GetRecurseChildResourceTypes(resourceType)
+	if err != nil {
+		return nil, err
+	}
+
+	var resTypeIDArr []string
+	for _, resType := range resourceTypeArr {
+		resTypeIDArr = append(resTypeIDArr, resType.ID)
+	}
+	results := models.Resources{}
+	if err1 := DB.C(models.CollectionResource).Find( bson.M{"resourcetypeid" : bson.M{"$in" : resTypeIDArr}} ).Sort("+name").All(&results); err1 != nil {
+		return nil, err1
+	}
+
+	return results, nil
+}
+
+func (r *LabMongoDBRepository) AddResource (Resource models.Resource) error {
+	DB, err := r.GetDatabaseHandle()
+
+	if err != nil {
+		return err
+	}
+
+	err = DB.C(models.CollectionResource).Insert(Resource)
+	return err
+}
+
+func (r *LabMongoDBRepository) DeleteResourcesByName(resourceName []string) error {
+	return nil
+}
+
+func (r *LabMongoDBRepository) DeleteResourcesByID(resourceID []string) error {
+	return nil
+}
+
+func (r *LabMongoDBRepository) DeleteAllResources () error {
+	DB, err := r.GetDatabaseHandle()
+
+	if err != nil {
+		return err
+	}
+
+	_, err = DB.C(models.CollectionResource).RemoveAll(nil)
+
+	return err
+}
+
+func (r *LabMongoDBRepository) UpdateResourceByName(resourceName string, resource models.Resource) error {
+	return nil
+}
+
+func (r *LabMongoDBRepository) GetResourceReservationMatrix(resourceName string) ([]models.ReservationMatrix, error) {
+	return nil, nil
 }
 
 func (r *LabMongoDBRepository) ReserveResource(string, matrix models.ReservationMatrix) error {
