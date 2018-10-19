@@ -1,0 +1,466 @@
+To install mongodb:
+https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/#install-mdb-edition
+
+To start mongod :
+c:\mongodb\bin>mongod.exe --dbpath="c:\mongodb\data\db" --logpath c:\mongodb\log\mongo.log
+
+To start mongo shell:
+
+c:\mongodb\bin>mongo.exe
+MongoDB shell version v4.0.2
+connecting to: mongodb://127.0.0.1:27017
+MongoDB server version: 4.0.2
+Server has startup warnings:
+2018-09-30T09:52:16.603+0530 I CONTROL  [initandlisten]
+2018-09-30T09:52:16.603+0530 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2018-09-30T09:52:16.603+0530 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2018-09-30T09:52:16.603+0530 I CONTROL  [initandlisten]
+2018-09-30T09:52:16.603+0530 I CONTROL  [initandlisten] ** WARNING: This server is bound to localhost.
+2018-09-30T09:52:16.603+0530 I CONTROL  [initandlisten] **          Remote systems will be unable to connect to this server.
+2018-09-30T09:52:16.603+0530 I CONTROL  [initandlisten] **          Start the server with --bind_ip <address> to specify which IP
+2018-09-30T09:52:16.604+0530 I CONTROL  [initandlisten] **          addresses it should serve responses from, or with --bind_ip_all to
+2018-09-30T09:52:16.604+0530 I CONTROL  [initandlisten] **          bind to all interfaces. If this behavior is desired, start the
+2018-09-30T09:52:16.604+0530 I CONTROL  [initandlisten] **          server with --bind_ip 127.0.0.1 to disable this warning.
+2018-09-30T09:52:16.604+0530 I CONTROL  [initandlisten]
+---
+Enable MongoDB's free cloud-based monitoring service, which will then receive and display
+metrics about your deployment (disk utilization, CPU, operation statistics, etc).
+
+The monitoring data will be available on a MongoDB website with a unique URL accessible to you
+and anyone you share the URL with. MongoDB may use this information to make product
+improvements and to suggest MongoDB products and deployment options to you.
+
+To enable free monitoring, run the following command: db.enableFreeMonitoring()
+To permanently disable this reminder, run the following command: db.disableFreeMonitoring()
+---
+
+> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+> use mycustomers;
+switched to db mycustomers
+> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+> db
+mycustomers
+
+Create User per DB.
+
+> db.createUser({user:"mithun",pwd:"mith1234",roles:["readWrite", "dbAdmin"]});
+Successfully added user: { "user" : "mithun", "roles" : [ "readWrite", "dbAdmin" ] }
+
+This Collection is similar to table in RDBMS.
+
+> db.createCollection('customers') 
+{ "ok" : 1 }
+> show collections
+customers
+
+
+This is similar to inserting a row in RDBMS
+> db.cutomers.insert({first_name:"mithun", last_name:"belur"}); 
+WriteResult({ "nInserted" : 1 })
+> db.cutomers.find();
+{ "_id" : ObjectId("5bb0547211856a28d1a48167"), "first_name" : "mithun", "last_name" : "belur" }
+
+This is bulk insert. Unlike RDBMS, you can add new field gender without modifying any schema.
+
+> db.cutomers.insert([{first_name:"sushma", last_name:"mylavaram"}, {first_name:"srishti", last_name:"belur", gender:"female"}]); 
+BulkWriteResult({
+        "writeErrors" : [ ],
+        "writeConcernErrors" : [ ],
+        "nInserted" : 2,
+        "nUpserted" : 0,
+        "nMatched" : 0,
+        "nModified" : 0,
+        "nRemoved" : 0,
+        "upserted" : [ ]
+})
+
+This is similar to 'select * ' in RDBMS
+> db.cutomers.find();
+{ "_id" : ObjectId("5bb0547211856a28d1a48167"), "first_name" : "mithun", "last_name" : "belur" }
+{ "_id" : ObjectId("5bb054da11856a28d1a48168"), "first_name" : "sushma", "last_name" : "mylavaram" }
+{ "_id" : ObjectId("5bb054da11856a28d1a48169"), "first_name" : "srishti", "last_name" : "belur", "gender" : "female" }
+
+
+> db.cutomers.find().pretty();
+{
+        "_id" : ObjectId("5bb0547211856a28d1a48167"),
+        "first_name" : "mithun",
+        "last_name" : "belur"
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48168"),
+        "first_name" : "sushma",
+        "last_name" : "mylavaram"
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48169"),
+        "first_name" : "srishti",
+        "last_name" : "belur",
+        "gender" : "female"
+}
+
+This is UPDATE operation in RDBMS, first argument specify which instance to be modified and second argument gives the value to be replaced.
+
+> db.cutomers.update({first_name:"mithun"}, {first_name:"mithun", last_name:"belur", gender:"male"});
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.cutomers.find().pretty();
+{
+        "_id" : ObjectId("5bb0547211856a28d1a48167"),
+        "first_name" : "mithun",
+        "last_name" : "belur",
+        "gender" : "male"
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48168"),
+        "first_name" : "sushma",
+        "last_name" : "mylavaram"
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48169"),
+        "first_name" : "srishti",
+        "last_name" : "belur",
+        "gender" : "female"
+}
+
+You can as well set a field value without modifying existing fields. (USE $set)
+
+> db.cutomers.update({first_name:"sushma"}, {$set:{gender:"female"}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.cutomers.find().pretty();
+{
+        "_id" : ObjectId("5bb0547211856a28d1a48167"),
+        "first_name" : "mithun",
+        "last_name" : "belur",
+        "gender" : "male"
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48168"),
+        "first_name" : "sushma",
+        "last_name" : "mylavaram",
+        "gender" : "female"
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48169"),
+        "first_name" : "srishti",
+        "last_name" : "belur",
+        "gender" : "female"
+}
+
+You can set($set), increment ($inc) and unset($unset) fields as below:
+
+> db.cutomers.update({first_name:"mithun"}, {$set:{age:30}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.cutomers.find().pretty();
+{
+        "_id" : ObjectId("5bb0547211856a28d1a48167"),
+        "first_name" : "mithun",
+        "last_name" : "belur",
+        "gender" : "male",
+        "age" : 30
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48168"),
+        "first_name" : "sushma",
+        "last_name" : "mylavaram",
+        "gender" : "female"
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48169"),
+        "first_name" : "srishti",
+        "last_name" : "belur",
+        "gender" : "female"
+}
+> db.cutomers.update({first_name:"mithun"}, {$inc:{age:3}});
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.cutomers.find().pretty();
+{
+        "_id" : ObjectId("5bb0547211856a28d1a48167"),
+        "first_name" : "mithun",
+        "last_name" : "belur",
+        "gender" : "male",
+        "age" : 33
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48168"),
+        "first_name" : "sushma",
+        "last_name" : "mylavaram",
+        "gender" : "female"
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48169"),
+        "first_name" : "srishti",
+        "last_name" : "belur",
+        "gender" : "female"
+}
+> db.cutomers.update({first_name:"mithun"}, {$unset:{age:30}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.cutomers.find().pretty();
+{
+        "_id" : ObjectId("5bb0547211856a28d1a48167"),
+        "first_name" : "mithun",
+        "last_name" : "belur",
+        "gender" : "male"
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48168"),
+        "first_name" : "sushma",
+        "last_name" : "mylavaram",
+        "gender" : "female"
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48169"),
+        "first_name" : "srishti",
+        "last_name" : "belur",
+        "gender" : "female"
+}
+
+To insert or update(if exists) use $upsert.
+
+> db.cutomers.update({first_name:"raghu"}, {first_name:"raghu", last_name:"belur"}, {upsert:true});
+WriteResult({
+        "nMatched" : 0,
+        "nUpserted" : 1,
+        "nModified" : 0,
+        "_id" : ObjectId("5bb0570fbdd71ad5fed333fa")
+})
+> db.cutomers.find().pretty();
+{
+        "_id" : ObjectId("5bb0547211856a28d1a48167"),
+        "first_name" : "mithun",
+        "last_name" : "belur",
+        "gender" : "male"
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48168"),
+        "first_name" : "sushma",
+        "last_name" : "mylavaram",
+        "gender" : "female"
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48169"),
+        "first_name" : "srishti",
+        "last_name" : "belur",
+        "gender" : "female"
+}
+{
+        "_id" : ObjectId("5bb0570fbdd71ad5fed333fa"),
+        "first_name" : "raghu",
+        "last_name" : "belur"
+}
+
+To rename the field for an instance
+
+> db.cutomers.update({first_name:"raghu"}, {$rename:{"gender":"sex"}});
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 0 })
+> db.cutomers.find().pretty();
+{
+        "_id" : ObjectId("5bb0547211856a28d1a48167"),
+        "first_name" : "mithun",
+        "last_name" : "belur",
+        "gender" : "male"
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48168"),
+        "first_name" : "sushma",
+        "last_name" : "mylavaram",
+        "gender" : "female"
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48169"),
+        "first_name" : "srishti",
+        "last_name" : "belur",
+        "gender" : "female"
+}
+{
+        "_id" : ObjectId("5bb0570fbdd71ad5fed333fa"),
+        "first_name" : "raghu",
+        "last_name" : "belur"
+}
+> db.cutomers.update({first_name:"mithun"}, {$rename:{"gender":"sex"}});
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.cutomers.find().pretty();
+{
+        "_id" : ObjectId("5bb0547211856a28d1a48167"),
+        "first_name" : "mithun",
+        "last_name" : "belur",
+        "sex" : "male"
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48168"),
+        "first_name" : "sushma",
+        "last_name" : "mylavaram",
+        "gender" : "female"
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48169"),
+        "first_name" : "srishti",
+        "last_name" : "belur",
+        "gender" : "female"
+}
+{
+        "_id" : ObjectId("5bb0570fbdd71ad5fed333fa"),
+        "first_name" : "raghu",
+        "last_name" : "belur"
+}
+
+
+To delete an instance.
+
+> db.cutomers.remove({first_name:"raghu"});
+WriteResult({ "nRemoved" : 1 })
+
+> db.cutomers.find().pretty();
+{
+        "_id" : ObjectId("5bb0547211856a28d1a48167"),
+        "first_name" : "mithun",
+        "last_name" : "belur",
+        "sex" : "male"
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48168"),
+        "first_name" : "sushma",
+        "last_name" : "mylavaram",
+        "gender" : "female"
+}
+{
+        "_id" : ObjectId("5bb054da11856a28d1a48169"),
+        "first_name" : "srishti",
+        "last_name" : "belur",
+        "gender" : "female"
+}
+>
+bye
+
+
+Contents of dummyData.js:
+You can do bulk insert using java script as below:
+
+use dummyStore;
+var bulk = db.store.initializeUnorderedBulkOp();
+bulk.insert(   { _id: 1, title: "Apple iMac Pro", image: "http:://example.com/p1.jpg", price: 5000, rating: 4 });
+bulk.insert(   { _id: 2, title: "Google Pixel 2", image: "http:://example.com/p2.jpg", price: 2000, rating: 5});
+bulk.insert(   { _id: 3, title: "Apple iPhone X", image: "http:://example.com/p3.jpg", price: 3000, rating: 5});
+bulk.insert(   { _id: 4, title: "Google Chromebook", image: "http:://example.com/p4.jpg", price: 4000, rating: 5});
+bulk.insert(   { _id: 5, title: "Microsoft Holo Lens", image: "http:://example.com/p5.jpg", price: 1000, rating: 4});
+bulk.insert(   { _id: 6, title: "Samsung Galaxy S8", image: "http:://example.com/p6.jpg", price: 3000, rating: 3});
+bulk.execute();
+
+
+
+c:\mongodb\bin>mongo < c:\Data\Mithun\Projects\rest-and-go\dummyData.js
+MongoDB shell version v4.0.2
+connecting to: mongodb://127.0.0.1:27017
+MongoDB server version: 4.0.2
+switched to db dummyStore
+BulkWriteResult({
+        "writeErrors" : [ ],
+        "writeConcernErrors" : [ ],
+        "nInserted" : 6,
+        "nUpserted" : 0,
+        "nMatched" : 0,
+        "nModified" : 0,
+        "nRemoved" : 0,
+        "upserted" : [ ]
+})
+bye
+
+c:\mongodb\bin>mongo
+MongoDB shell version v4.0.2
+connecting to: mongodb://127.0.0.1:27017
+MongoDB server version: 4.0.2
+Server has startup warnings:
+2018-09-30T09:52:16.603+0530 I CONTROL  [initandlisten]
+2018-09-30T09:52:16.603+0530 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2018-09-30T09:52:16.603+0530 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2018-09-30T09:52:16.603+0530 I CONTROL  [initandlisten]
+2018-09-30T09:52:16.603+0530 I CONTROL  [initandlisten] ** WARNING: This server is bound to localhost.
+2018-09-30T09:52:16.603+0530 I CONTROL  [initandlisten] **          Remote systems will be unable to connect to this server.
+2018-09-30T09:52:16.603+0530 I CONTROL  [initandlisten] **          Start the server with --bind_ip <address> to specify which IP
+2018-09-30T09:52:16.604+0530 I CONTROL  [initandlisten] **          addresses it should serve responses from, or with --bind_ip_all to
+2018-09-30T09:52:16.604+0530 I CONTROL  [initandlisten] **          bind to all interfaces. If this behavior is desired, start the
+2018-09-30T09:52:16.604+0530 I CONTROL  [initandlisten] **          server with --bind_ip 127.0.0.1 to disable this warning.
+2018-09-30T09:52:16.604+0530 I CONTROL  [initandlisten]
+---
+Enable MongoDB's free cloud-based monitoring service, which will then receive and display
+metrics about your deployment (disk utilization, CPU, operation statistics, etc).
+
+The monitoring data will be available on a MongoDB website with a unique URL accessible to you
+and anyone you share the URL with. MongoDB may use this information to make product
+improvements and to suggest MongoDB products and deployment options to you.
+
+To enable free monitoring, run the following command: db.enableFreeMonitoring()
+To permanently disable this reminder, run the following command: db.disableFreeMonitoring()
+---
+
+> show dbs
+admin        0.000GB
+config       0.000GB
+dummyStore   0.000GB
+local        0.000GB
+mycustomers  0.000GB
+> use dummyStore
+switched to db dummyStore
+> show collections
+store
+> db.store.find();
+{ "_id" : 1, "title" : "Apple iMac Pro", "image" : "http:://example.com/p1.jpg", "price" : 5000, "rating" : 4 }
+{ "_id" : 2, "title" : "Google Pixel 2", "image" : "http:://example.com/p2.jpg", "price" : 2000, "rating" : 5 }
+{ "_id" : 3, "title" : "Apple iPhone X", "image" : "http:://example.com/p3.jpg", "price" : 3000, "rating" : 5 }
+{ "_id" : 4, "title" : "Google Chromebook", "image" : "http:://example.com/p4.jpg", "price" : 4000, "rating" : 5 }
+{ "_id" : 5, "title" : "Microsoft Holo Lens", "image" : "http:://example.com/p5.jpg", "price" : 1000, "rating" : 4 }
+{ "_id" : 6, "title" : "Samsung Galaxy S8", "image" : "http:://example.com/p6.jpg", "price" : 3000, "rating" : 3 }
+
+>
+> db.createUser({user:"dbuser",pwd:"mith1234",roles:["readWrite", "dbAdmin"]});
+Successfully added user: { "user" : "dbuser", "roles" : [ "readWrite", "dbAdmin" ] }
+> db.getUsers();
+[
+        {
+                "_id" : "dummyStore.dbuser",
+                "user" : "dbuser",
+                "db" : "dummyStore",
+                "roles" : [
+                        {
+                                "role" : "readWrite",
+                                "db" : "dummyStore"
+                        },
+                        {
+                                "role" : "dbAdmin",
+                                "db" : "dummyStore"
+                        }
+                ],
+                "mechanisms" : [
+                        "SCRAM-SHA-1",
+                        "SCRAM-SHA-256"
+                ]
+        }
+]
+> db.getUser("dbuser");
+{
+        "_id" : "dummyStore.dbuser",
+        "user" : "dbuser",
+        "db" : "dummyStore",
+        "roles" : [
+                {
+                        "role" : "readWrite",
+                        "db" : "dummyStore"
+                },
+                {
+                        "role" : "dbAdmin",
+                        "db" : "dummyStore"
+                }
+        ],
+        "mechanisms" : [
+                "SCRAM-SHA-1",
+                "SCRAM-SHA-256"
+        ]
+}
+>
+
+So, now in the server side of application you can use this URL to connect to MongoDB : mongodb://dbuser:mith1234@127.0.0.1:27017/dummyStore
