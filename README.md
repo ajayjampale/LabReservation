@@ -45,3 +45,7 @@ The Application helps collaborate Software Dev/Test Teams to effectively use LAB
         c:\mongodb\bin>mongo.exe
         
    - Basic CRUD operations on mongoDB collection is demonstrated in the file mongodb_helloworld.txt
+
+   - Once familiar with above mongoDB queries, you can use mongo Compass GUI tool to View/query/delete collections
+   
+        https://www.mongodb.com/download-center?initial=true#compass

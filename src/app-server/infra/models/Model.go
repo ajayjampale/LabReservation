@@ -1,7 +1,8 @@
 package models
 
 const (
-	CollectionResourceType    = "ResourceType"
+	CollectionResourceType = "ResourceType"
+	CollectionResource     = "Resource"
 )
 
 /*
@@ -29,8 +30,8 @@ type User struct {
 /* This will be a list
    addResourceType, GetResourceType, UpdateResourceType, DeleteResourceType */
 type ResourceType struct {
-	ID   string `bson:"_id"`
-	Type string `json:"resourcetype"`
+	ID           string `bson:"_id"`
+	Type         string `json:"resourcetype"`
 	ParentTypeID string `json:"parentresourcetype"`
 }
 
@@ -64,7 +65,7 @@ type ResourcePortMatrix struct {
 /* This will be a list
    addResource, GetResource, UpdateResource, DeleteResource */
 type Resource struct {
-	ID                string               `json:"_id"`
+	ID                string               `bson:"_id"`
 	Name              string               `json:"resourcename"`
 	Description       string               `json:"description"`
 	ResourceTypeID    string               `bson:"resourcetypeid"`
