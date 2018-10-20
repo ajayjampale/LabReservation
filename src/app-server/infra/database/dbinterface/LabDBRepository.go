@@ -18,8 +18,8 @@ type LabDBRepository interface {
 	GetResourcesInLab(labname string) (models.Resources, error)
 	GetResourcesByType(resourceType string) (models.Resources, error)
 	AddResource(models.Resource) error
-	DeleteResourcesByName(resourceName []string) error
-	DeleteResourcesByID(resourceID []string) error
+	DeleteResourcesByName(resourceNames []string) (error)
+	DeleteResourcesByID(resourceIDs []string) (error)
 	DeleteAllResources () error
 	UpdateResourceByName(resourceName string, resource models.Resource) error
 	GetResourceReservationMatrix(resourceName string) ([]models.ReservationMatrix, error)

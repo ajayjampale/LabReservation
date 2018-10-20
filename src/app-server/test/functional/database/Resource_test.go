@@ -258,40 +258,103 @@ func TestResourceCRUD(t *testing.T) {
 	err = labDB.AddResource(models.Resource{
 		ID:              "4", Name: "Team2_AVA1", Description: "Avalanche for abc Team", ResourceTypeID: "7",
 		Infos:           []models.ResourceInfo{models.ResourceInfo{IPAddress: []string{"10.10.11.10"}, Lab: "Sanjose Campus"}},
-		PortMatrix:      []models.ResourcePortMatrix{},
+		PortMatrix:      []models.ResourcePortMatrix{
+			models.ResourcePortMatrix{SourcePort: "1", RemotePort: "2", RemoteResourceID: "6"},
+			models.ResourcePortMatrix{SourcePort: "4", RemotePort: "4", RemoteResourceID: "8"},},
+		ResourceOwnerID: "1",
+	});
+	assert.Nil(t, err)
+
+	err = labDB.AddResource(models.Resource{
+		ID:              "5", Name: "Team1_Fusion1", Description: "Fusion for xyz Team", ResourceTypeID: "8",
+		Infos:           []models.ResourceInfo{models.ResourceInfo{IPAddress: []string{"10.10.10.13"}, Lab: "Bangalore Campus"}},
+		PortMatrix:      []models.ResourcePortMatrix{models.ResourcePortMatrix{SourcePort: "2", RemotePort: "1", RemoteResourceID: "1"},},
+		ResourceOwnerID: "1",
+	});
+	assert.Nil(t, err)
+
+	err = labDB.AddResource(models.Resource{
+		ID:              "6", Name: "Team2_Cedar1", Description: "Cedar for abc Team", ResourceTypeID: "9",
+		Infos:           []models.ResourceInfo{models.ResourceInfo{IPAddress: []string{"10.10.11.11"}, Lab: "Sanjose Campus"}},
+		PortMatrix:      []models.ResourcePortMatrix{
+			models.ResourcePortMatrix{SourcePort: "2", RemotePort: "1", RemoteResourceID: "4"},
+			models.ResourcePortMatrix{SourcePort: "3", RemotePort: "3", RemoteResourceID: "7"},},
+		ResourceOwnerID: "1",
+	});
+	assert.Nil(t, err)
+
+	err = labDB.AddResource(models.Resource{
+		ID:              "7", Name: "Team2_Cedar2", Description: "Cedar for xyz Team", ResourceTypeID: "9",
+		Infos:           []models.ResourceInfo{models.ResourceInfo{IPAddress: []string{"10.10.11.12"}, Lab: "Sanjose Campus"}},
+		PortMatrix:      []models.ResourcePortMatrix{models.ResourcePortMatrix{SourcePort: "3", RemotePort: "3", RemoteResourceID: "6"},},
+		ResourceOwnerID: "1",
+	});
+	assert.Nil(t, err)
+
+	err = labDB.AddResource(models.Resource{
+		ID:              "8", Name: "Team2_Freedom1", Description: "Freedom for xyz Team", ResourceTypeID: "10",
+		Infos:           []models.ResourceInfo{models.ResourceInfo{IPAddress: []string{"10.10.11.13"}, Lab: "Sanjose Campus"}},
+		PortMatrix:      []models.ResourcePortMatrix{models.ResourcePortMatrix{SourcePort: "4", RemotePort: "4", RemoteResourceID: "4"},},
 		ResourceOwnerID: "1",
 	});
 	assert.Nil(t, err)
 
 	resourceOut, err := labDB.GetResources();
 	assert.Nil(t, err)
-
-	assert.Equal(t, 4, len(resourceOut))
-
+	assert.Equal(t, 8, len(resourceOut))
 
 	resourceOut, err = labDB.GetResourcesInLab("Bangalore Campus");
 	assert.Nil(t, err)
-
-	assert.Equal(t, 3, len(resourceOut))
+	assert.Equal(t, 4, len(resourceOut))
 
 	resourceOut, err = labDB.GetResourcesInLab("Sanjose Campus");
 	assert.Nil(t, err)
-
-	assert.Equal(t, 1, len(resourceOut))
+	assert.Equal(t, 4, len(resourceOut))
 
 	resourceOut, err = labDB.GetResourcesInLab("Mysore Campus");
 	assert.Nil(t, err)
-
 	assert.Equal(t, 0, len(resourceOut))
 
 	resourceOut, err = labDB.GetResourcesByType("NOS Devices");
 	assert.Nil(t, err)
-
 	assert.Equal(t, 3, len(resourceOut))
 
 	resourceOut, err = labDB.GetResourcesByType("SLXOS Devices");
 	assert.Nil(t, err)
+	assert.Equal(t, 5, len(resourceOut))
 
+	resourceOut, err = labDB.GetResourcesByType("Switches");
+	assert.Nil(t, err)
+	assert.Equal(t, 3, len(resourceOut))
+
+	resourceOut, err = labDB.GetResourcesByType("Routers");
+	assert.Nil(t, err)
+	assert.Equal(t, 2, len(resourceOut))
+
+	err = labDB.DeleteResourcesByName([]string{"Team2_Cedar1", "Team2_Cedar2"})
+	assert.Nil(t, err)
+
+	resourceOut, err = labDB.GetResourcesByType("Cedar");
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(resourceOut))
+
+	resourceOut, err = labDB.GetResourcesByType("Switches");
+	assert.Nil(t, err)
 	assert.Equal(t, 1, len(resourceOut))
+
+	resourceOut, err = labDB.GetResources();
+	assert.Nil(t, err)
+	assert.Equal(t, 6, len(resourceOut))
+
+	err = labDB.DeleteResourcesByID([]string{"1", "2"})
+	assert.Nil(t, err)
+
+	resourceOut, err = labDB.GetResourcesByType("NOS Devices");
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(resourceOut))
+
+	resourceOut, err = labDB.GetResources();
+	assert.Nil(t, err)
+	assert.Equal(t, 4, len(resourceOut))
 
 }
