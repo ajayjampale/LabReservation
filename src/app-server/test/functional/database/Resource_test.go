@@ -241,7 +241,9 @@ func TestResourceCRUD(t *testing.T) {
 	err = labDB.AddResource(models.Resource{
 		ID:              "2", Name: "Team1_Castor2", Description: "Castor for xyz Team", ResourceTypeID: "5",
 		Infos:           []models.ResourceInfo{models.ResourceInfo{IPAddress: []string{"10.10.10.11"}, Lab: "Bangalore Campus"}},
-		PortMatrix:      []models.ResourcePortMatrix{models.ResourcePortMatrix{SourcePort: "2", RemotePort: "1", RemoteResourceID: "1"},},
+		PortMatrix:      []models.ResourcePortMatrix{models.ResourcePortMatrix{SourcePort: "2", RemotePort: "1", RemoteResourceID: "1"},
+			models.ResourcePortMatrix{SourcePort: "3", RemotePort: "3", RemoteResourceID: "3"},
+			models.ResourcePortMatrix{SourcePort:"4", RemotePort:"4", RemoteResourceID:"5"}},
 		ResourceOwnerID: "1",
 	});
 	assert.Nil(t, err)
@@ -249,7 +251,8 @@ func TestResourceCRUD(t *testing.T) {
 	err = labDB.AddResource(models.Resource{
 		ID:              "3", Name: "Team1_Rigel", Description: "Rigel for xyz Team", ResourceTypeID: "6",
 		Infos:           []models.ResourceInfo{models.ResourceInfo{IPAddress: []string{"10.10.10.12"}, Lab: "Bangalore Campus"}},
-		PortMatrix:      []models.ResourcePortMatrix{models.ResourcePortMatrix{SourcePort: "2", RemotePort: "2", RemoteResourceID: "1"},},
+		PortMatrix:      []models.ResourcePortMatrix{models.ResourcePortMatrix{SourcePort: "2", RemotePort: "2", RemoteResourceID: "1"},
+			models.ResourcePortMatrix{SourcePort: "3", RemotePort: "3", RemoteResourceID: "2"},},
 		ResourceOwnerID: "1",
 	});
 	assert.Nil(t, err)
@@ -268,7 +271,8 @@ func TestResourceCRUD(t *testing.T) {
 	err = labDB.AddResource(models.Resource{
 		ID:              "5", Name: "Team1_Fusion1", Description: "Fusion for xyz Team", ResourceTypeID: "8",
 		Infos:           []models.ResourceInfo{models.ResourceInfo{IPAddress: []string{"10.10.10.13"}, Lab: "Bangalore Campus"}},
-		PortMatrix:      []models.ResourcePortMatrix{models.ResourcePortMatrix{SourcePort: "2", RemotePort: "1", RemoteResourceID: "1"},},
+		PortMatrix:      []models.ResourcePortMatrix{models.ResourcePortMatrix{SourcePort: "2", RemotePort: "1", RemoteResourceID: "1"},
+		models.ResourcePortMatrix{SourcePort:"4", RemotePort:"4", RemoteResourceID:"2"}},
 		ResourceOwnerID: "1",
 	});
 	assert.Nil(t, err)
@@ -356,5 +360,13 @@ func TestResourceCRUD(t *testing.T) {
 	resourceOut, err = labDB.GetResources();
 	assert.Nil(t, err)
 	assert.Equal(t, 4, len(resourceOut))
+
+/*	// Delete any existing Resources
+	err = labDB.DeleteAllResources()
+	assert.Nil(t, err)
+
+	// Delete any existing ResourceTypes
+	err = labDB.DeleteAllResourceTypes()
+	assert.Nil(t, err)*/
 
 }

@@ -76,18 +76,8 @@ func (r *LabMongoDBRepository) GetChildResourceTypes(resourceType string) ([]mod
 
 }
 
-func (r *LabMongoDBRepository) GetChildResourceTypesOfParentType(parentTypeIDArray []string) ([]models.ResourceType, error) {
-	DB, err := r.GetDatabaseHandle()
-
-	results := []models.ResourceType{}
-	if err1 := DB.C(models.CollectionResourceType).Find(bson.M{"parenttypeid": bson.M{"$in":parentTypeIDArray}}).Sort("+type").All(&results); err1 != nil {
-		return nil, err1
-	}
-	return results, err
-}
-
 func (r *LabMongoDBRepository) GetRecurseChildResourceTypes(resourceType string) ([]models.ResourceType, error) {
-	var err error
+	DB, err := r.GetDatabaseHandle()
 
 	var resType models.ResourceType
 	if resType, err = r.GetResourceType(resourceType); err != nil {
@@ -100,7 +90,12 @@ func (r *LabMongoDBRepository) GetRecurseChildResourceTypes(resourceType string)
 	parentTypeArray := []string{resType.ID}
 
 	for (len(parentTypeArray) != 0) {
-		resTypes, err := r.GetChildResourceTypesOfParentType(parentTypeArray)
+		resTypes := []models.ResourceType{}
+		if err1 := DB.C(models.CollectionResourceType).Find(bson.M{"parenttypeid": bson.M{"$in":parentTypeArray}}).Sort("+type").All(&resTypes); err1 != nil {
+			return nil, err1
+		}
+
+		//resTypes, err := r.GetChildResourceTypesOfParentType(parentTypeArray)
 		parentTypeArray = parentTypeArray[:0]
 		if err == nil {
 			for _,resType := range resTypes {
@@ -151,6 +146,7 @@ func (r *LabMongoDBRepository) GetResources() (models.Resources, error) {
 	return results, nil
 
 }
+
 func (r *LabMongoDBRepository) GetResourcesInLab(labname string) (models.Resources, error) {
 
 	DB, err := r.GetDatabaseHandle()
@@ -167,6 +163,7 @@ func (r *LabMongoDBRepository) GetResourcesInLab(labname string) (models.Resourc
 	return results, nil
 
 }
+
 func (r *LabMongoDBRepository) GetResourcesByType (resourceType string) (models.Resources, error) {
 	DB, err := r.GetDatabaseHandle()
 	if err != nil {
@@ -207,6 +204,26 @@ func (r *LabMongoDBRepository) DeleteResourcesByName(resourceNames []string) (er
 	if err != nil {
 		return err
 	}
+	// Need to Fix here. Update Resources which are having port matrix connected to the resources which are getting deleted.
+	results := models.Resources{}
+	if err1 := DB.C(models.CollectionResource).Find( bson.M{"name" : bson.M{"$in" : resourceNames} }).Sort("+name").All(&results); err1 != nil {
+		return err1
+	}
+
+	var resourceIDArr []string
+	for _, resource := range results {
+		resourceIDArr = append(resourceIDArr, resource.ID)
+	}
+
+	_, err = DB.C(models.CollectionResource).UpdateAll(nil,
+		bson.M{"$pull" :
+		bson.M{"portmatrix" :
+		bson.M{"remoteresourceid" :
+		bson.M{"$in" : resourceIDArr}}}})
+
+	if err != nil {
+		return err
+	}
 
 	_,err = DB.C(models.CollectionResource).RemoveAll(bson.M{"name" : bson.M{"$in" : resourceNames}})
 
@@ -216,6 +233,16 @@ func (r *LabMongoDBRepository) DeleteResourcesByName(resourceNames []string) (er
 
 func (r *LabMongoDBRepository) DeleteResourcesByID(resourceIDs []string) (error) {
 	DB, err := r.GetDatabaseHandle()
+
+	if err != nil {
+		return err
+	}
+
+	_, err = DB.C(models.CollectionResource).UpdateAll(nil,
+		bson.M{"$pull" :
+		bson.M{"portmatrix" :
+		bson.M{"remoteresourceid" :
+		bson.M{"$in" : resourceIDs}}}})
 
 	if err != nil {
 		return err
