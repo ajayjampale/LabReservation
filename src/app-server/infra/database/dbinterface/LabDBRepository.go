@@ -9,7 +9,6 @@ type LabDBRepository interface {
 	GetResourceTypes() ([]models.ResourceType, error)
 	GetChildResourceTypes(resourceType string) ([]models.ResourceType, error)
 	GetRecurseChildResourceTypes(resourceType string) ([]models.ResourceType, error)
-	GetChildResourceTypesOfParentType(parentTypeArray []string) ([]models.ResourceType, error)
 	AddResourceType(resourceType models.ResourceType) error
 	DeleteAllResourceTypes() error
 
