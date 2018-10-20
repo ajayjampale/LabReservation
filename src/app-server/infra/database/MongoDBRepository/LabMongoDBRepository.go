@@ -201,12 +201,29 @@ func (r *LabMongoDBRepository) AddResource (Resource models.Resource) error {
 	return err
 }
 
-func (r *LabMongoDBRepository) DeleteResourcesByName(resourceName []string) error {
-	return nil
+func (r *LabMongoDBRepository) DeleteResourcesByName(resourceNames []string) (error) {
+	DB, err := r.GetDatabaseHandle()
+
+	if err != nil {
+		return err
+	}
+
+	_,err = DB.C(models.CollectionResource).RemoveAll(bson.M{"name" : bson.M{"$in" : resourceNames}})
+
+	return err
+
 }
 
-func (r *LabMongoDBRepository) DeleteResourcesByID(resourceID []string) error {
-	return nil
+func (r *LabMongoDBRepository) DeleteResourcesByID(resourceIDs []string) (error) {
+	DB, err := r.GetDatabaseHandle()
+
+	if err != nil {
+		return err
+	}
+
+	_,err = DB.C(models.CollectionResource).RemoveAll(bson.M{"_id" : bson.M{"$in" : resourceIDs}})
+
+	return err
 }
 
 func (r *LabMongoDBRepository) DeleteAllResources () error {
