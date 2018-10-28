@@ -97,7 +97,7 @@ type ResourceReserveCapabilityMatrix struct {
 type ReservationMatrix struct {
 	UserID    string `bson:"userid"`
 	StartTime string `json:"starttime"` // Need to think about the data type for time.
-	EndTime   string `json:"endtime"`   // Move it to duration.
+	Duration   string `json:"duration"`
 }
 
 // Update priority per user in SRS document
