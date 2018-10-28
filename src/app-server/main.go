@@ -1,158 +1,109 @@
-/*
 package main
 
 import (
+	"context"
+	"log"
 	"net/http"
-	"fmt"
-)
+	"sync/atomic"
+	"syscall"
+	"time"
 
-func main() {
-	http.Handle("/", http.FileServer(http.Dir("./")))
-	http.ListenAndServe(":8080", nil)
-}
-*/
+	"os"
+	"os/signal"
 
-/*package main
-
-import (
-"fmt"
-"net/http"
-
-"github.com/gorilla/mux"
-)
-
-func main() {
-	r := mux.NewRouter()
-	r.HandleFunc("/books/{title}/page/{page}", func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		title := vars["title"]
-		page := vars["page"]
-
-		fmt.Fprintf(w, "You've requested the book: %s on page %s\n", title, page)
-	})
-
-	http.ListenAndServe(":80", r)
-}*/
-
-package main
-
-import (
-	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/securecookie"
-	"net/http"
 )
 
-// cookie handling
+//LRMServer denotes Lab Resource Management HTTP Server.
+type LRMServer struct {
+	http.Server
+	shutdownReq chan bool
+	reqCount    uint32
+}
 
-var cookieHandler = securecookie.New(
-	securecookie.GenerateRandomKey(64),
-	securecookie.GenerateRandomKey(32))
-
-func getUserName(request *http.Request) (userName string) {
-	if cookie, err := request.Cookie("session"); err == nil {
-		cookieValue := make(map[string]string)
-		if err = cookieHandler.Decode("session", cookie.Value, &cookieValue); err == nil {
-			userName = cookieValue["name"]
-		}
+func NewLRMServer() *LRMServer {
+	//create server
+	s := &LRMServer{
+		Server: http.Server{
+			Addr:         ":8080",
+			ReadTimeout:  10 * time.Second,
+			WriteTimeout: 10 * time.Second,
+		},
+		shutdownReq: make(chan bool),
 	}
-	return userName
+	router := mux.NewRouter()
+
+	//register handlers
+	router.HandleFunc("/", s.RootHandler)
+	router.HandleFunc("/shutdown", s.ShutdownHandler)
+
+	//set http server handler
+	s.Handler = router
+
+	return s
 }
 
-func setSession(userName string, response http.ResponseWriter) {
-	value := map[string]string{
-		"name": userName,
+func (s *LRMServer) WaitForGracefulShutdown() {
+	irqSig := make(chan os.Signal, 1)
+	signal.Notify(irqSig, syscall.SIGINT, syscall.SIGTERM)
+
+	log.Printf("Waiting for shut signals ...")
+
+	//Wait interrupt or shutdown request through /shutdown
+	select {
+	case sig := <-irqSig:
+		log.Printf("Shutdown request (signal: %v)", sig)
+	case sig := <-s.shutdownReq:
+		log.Printf("Shutdown request (/shutdown %v)", sig)
 	}
-	if encoded, err := cookieHandler.Encode("session", value); err == nil {
-		cookie := &http.Cookie{
-			Name:  "session",
-			Value: encoded,
-			Path:  "/",
-		}
-		http.SetCookie(response, cookie)
-	}
-}
 
-func clearSession(response http.ResponseWriter) {
-	cookie := &http.Cookie{
-		Name:   "session",
-		Value:  "",
-		Path:   "/",
-		MaxAge: -1,
-	}
-	http.SetCookie(response, cookie)
-}
+	log.Printf("Stoping http server ...")
 
-// login handler
+	//Create shutdown context with 10 second timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-func loginHandler(response http.ResponseWriter, request *http.Request) {
-	name := request.FormValue("name")
-	pass := request.FormValue("password")
-	redirectTarget := "/"
-	if name != "" && pass != "" {
-		// .. check credentials ..
-		setSession(name, response)
-		redirectTarget = "/internal"
-	}
-	http.Redirect(response, request, redirectTarget, 302)
-}
-
-// logout handler
-
-func logoutHandler(response http.ResponseWriter, request *http.Request) {
-	clearSession(response)
-	http.Redirect(response, request, "/", 302)
-}
-
-// index page
-
-const indexPage = `
-<h1>Login</h1>
-<form method="post" action="/login">
-    <label for="name">User name</label>
-    <input type="text" id="name" name="name">
-    <label for="password">Password</label>
-    <input type="password" id="password" name="password">
-    <button type="submit">Login</button>
-</form>
-`
-
-func indexPageHandler(response http.ResponseWriter, request *http.Request) {
-	fmt.Fprintf(response, indexPage)
-}
-
-// internal page
-
-const internalPage = `
-<h1>Internal</h1>
-<hr>
-<small>User: %s</small>
-<form method="post" action="/logout">
-    <button type="submit">Logout</button>
-</form>
-`
-
-func internalPageHandler(response http.ResponseWriter, request *http.Request) {
-	userName := getUserName(request)
-	if userName != "" {
-		fmt.Fprintf(response, internalPage, userName)
-	} else {
-		http.Redirect(response, request, "/", 302)
+	//shutdown the server
+	err := s.Shutdown(ctx)
+	if err != nil {
+		log.Printf("Shutdown request error: %v", err)
 	}
 }
 
-// server main method
+func (s *LRMServer) RootHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Hello Gorilla MUX!\n"))
+}
 
-var router = mux.NewRouter()
+func (s *LRMServer) ShutdownHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Shutdown server"))
+
+	//Do nothing if shutdown request already issued
+	//if s.reqCount == 0 then set to 1, return true otherwise false
+	if !atomic.CompareAndSwapUint32(&s.reqCount, 0, 1) {
+		log.Printf("Shutdown through API call in progress...")
+		return
+	}
+
+	go func() {
+		s.shutdownReq <- true
+	}()
+}
 
 func main() {
+	//Start the lrmServer
+	lrmServer := NewLRMServer()
 
-	router.HandleFunc("/", indexPageHandler)
-	router.HandleFunc("/internal", internalPageHandler)
+	serverDone := make(chan bool)
+	go func() {
+		err := lrmServer.ListenAndServe()
+		if err != nil {
+			log.Printf("lrmServer ListenAndServe errored : %v", err)
+		}
+		serverDone <- true
+	}()
 
-	router.HandleFunc("/login", loginHandler).Methods("POST")
-	router.HandleFunc("/logout", logoutHandler).Methods("POST")
+	lrmServer.WaitForGracefulShutdown()
 
-	http.Handle("/", router)
-	http.ListenAndServe(":8000", nil)
+	<-serverDone
+	log.Printf("Exiting ...")
 }
