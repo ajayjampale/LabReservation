@@ -41,18 +41,18 @@ func NewLRMRouter() *mux.Router {
 
 //Index returns a welcome message
 func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello World!")
+	fmt.Fprintf(w, "Lab Resource Management Application!")
 }
 
 var routes = Routes{
-/*
+
 	Route{
 		Name:        "Index",
 		Method:      "GET",
-		Pattern:     "/",
+		Pattern:     "/v1/",
 		HandlerFunc: Index,
 	},
-*/
+
 /*	Route{
 		Name:        "Shutdown",
 		Method:      strings.ToUpper("POST"),
