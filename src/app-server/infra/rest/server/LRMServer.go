@@ -23,7 +23,7 @@ func NewLRMServer() *LRMServer {
 	//create server
 	s := &LRMServer{
 		Server: http.Server{
-			Addr:         ":8080",
+			Addr:         ":8081",
 			ReadTimeout:  10 * time.Second,
 			WriteTimeout: 10 * time.Second,
 		},

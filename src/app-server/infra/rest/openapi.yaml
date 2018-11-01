@@ -1,0 +1,113 @@
+swagger: "2.0"
+
+info:
+  title: Lab Resource Management
+  description: "This specification defines the APIs provided by the application to manage/share the lab resources by reserving and releasing it."
+  version: "1.0"
+  contact:
+    name: Mithun B S, Ajay Jampale
+    email: mithun.bs@gmail.com
+
+schemes:
+  - http
+host: localhost:8081
+basePath: /v1
+
+paths:
+  /resourcetype:
+    get:
+      tags:
+      - ResourceType
+      summary: Get All Resource Types.
+      description: Get All Resource Types configured in the application.
+      operationId: GetResourceTypes
+      parameters:
+       - name: ParentResourceType
+         in: query
+         required: false
+         description: Retrieves all resource types which falls under the given Parent Resource Type.
+         type: string
+      responses:
+        200:
+          description: OK
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+        404:
+          description: Given Parent Resource Type not found in the system.
+        500:
+          description: Unexpected error.
+    delete:
+      tags:
+      - ResourceType
+      summary: Delete Resource type.
+      description: Delete Resource Type configured in the application.
+      operationId: DeleteResourceType
+      parameters:
+      - name: ResourceType
+        in: query
+        required: true
+        description: Name of the Resource Type to be deleted
+        type: string
+      responses:
+        200:
+          description: OK
+        401:
+          description: Authorization information is missing or invalid.
+        404:
+          description: A resource type with the specified name was not found.
+        500:
+          description: Unexpected error.
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/ErrorModel'
+    post:
+      summary: Create a Resource Type
+      operationId: CreateResourceType
+      tags:
+      - ResourceType
+      parameters:
+        - name: Resource Type
+          in: body
+          description: Add a new Resource Type.
+          schema:
+            $ref: '#/definitions/NewResourceType'
+      responses:
+        200:
+          description: OK
+        401:
+          description: Authorization information is missing or invalid.
+        409:
+          description: A Resource Type with the specified name already exists.
+        410:
+          description: The specified Parent Resource Type doesnt exist.
+        500:
+          description: Unexpected error.
+        default:
+          description: Unexpected error
+          schema:
+              $ref: '#/definitions/ErrorModel'
+definitions:
+  NewResourceType:
+    type: object
+    required:
+      - resourceTypeName
+    properties:
+      resourceTypeName:
+        type: string
+      parentResourceTypeName:
+        type: string
+  ErrorModel:
+    type: object
+    required:
+    - message
+    - code
+    properties:
+      message:
+       type: string
+      code:
+        type: integer
+        minimum: 100
+        maximum: 600
