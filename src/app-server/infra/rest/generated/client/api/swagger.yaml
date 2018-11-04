@@ -21,7 +21,7 @@ paths:
       description: "Get All Resource Types configured in the application."
       operationId: "GetResourceTypes"
       parameters:
-      - name: "ParentResourceType"
+      - name: "parent_resource_type"
         in: "query"
         description: "Retrieves all resource types which falls under the given Parent\
           \ Resource Type."
@@ -30,7 +30,7 @@ paths:
         x-exportParamName: "ParentResourceType"
       responses:
         200:
-          description: "OK"
+          $ref: "#/definitions/ResourceTypesResponse"
         404:
           description: "Given Parent Resource Type not found in the system."
         500:
@@ -94,6 +94,27 @@ paths:
           schema:
             $ref: "#/definitions/ErrorModel"
 definitions:
+  ResourceTypesResponse:
+    properties:
+      items:
+        type: "array"
+        uniqueItems: true
+        items:
+          $ref: "#/definitions/ResourceTypeResponse"
+    title: "Resource Types"
+  ResourceTypeResponse:
+    type: "object"
+    properties:
+      resourcetypeid:
+        type: "string"
+        description: "ID of the resource type."
+      resourcetypename:
+        type: "string"
+        description: "Name of the resource type."
+      parentresourcetypeid:
+        type: "string"
+        description: "ID of the parent resource type."
+    title: "Resource Type"
   NewResourceType:
     type: "object"
     required:

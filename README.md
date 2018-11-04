@@ -75,7 +75,7 @@ The Application helps collaborate Software Dev/Test Teams to effectively use LAB
 
    - Generating Golang Client code
 
-    swagger-codegen generate -i ./src/app-server/infra/rest/openapi.yaml -l go -o ./src/app-server/infra/rest/generated/client
+        swagger-codegen generate -i ./src/app-server/infra/rest/openapi.yaml -l go -o ./src/app-server/infra/rest/generated/client
 
    - Generating Golang Server code
    

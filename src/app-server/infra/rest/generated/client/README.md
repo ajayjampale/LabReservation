@@ -30,6 +30,8 @@ Class | Method | HTTP request | Description
 
  - [ErrorModel](docs/ErrorModel.md)
  - [NewResourceType](docs/NewResourceType.md)
+ - [ResourceTypeResponse](docs/ResourceTypeResponse.md)
+ - [ResourceTypesResponse](docs/ResourceTypesResponse.md)
 
 
 ## Documentation For Authorization

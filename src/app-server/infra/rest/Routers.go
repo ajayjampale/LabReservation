@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"fmt"
 	"app-server/infra/rest/handlers"
+	"strings"
 )
 
 //Route defines a unique route for a REST request
@@ -24,6 +25,7 @@ func NewLRMRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range routes {
 		var handler http.Handler
+		fmt.Println("Registering ", route.Name, " with pattern ", route.Pattern)
 		handler = route.HandlerFunc
 		handler = handlers.Logger(handler, route.Name)
 
@@ -53,13 +55,13 @@ var routes = Routes{
 		HandlerFunc: Index,
 	},
 
-/*	Route{
-		Name:        "Shutdown",
-		Method:      strings.ToUpper("POST"),
-		Pattern:     "/shutdown",
-		HandlerFunc: Handler,
-		QueryPairs:  []string{"id", "{id}"},
-	},*/
+	Route{
+		Name:        "GetResourceTypes",
+		Method:      strings.ToUpper("Get"),
+		Pattern:     "/v1/resourcetypes",
+		HandlerFunc: handlers.GetResourceTypes,
+		QueryPairs:  []string{"parent_resource_type", "{parent_resource_type}"},
+	},
 
 }
 

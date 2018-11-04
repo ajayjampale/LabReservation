@@ -22,7 +22,7 @@ paths:
       description: Get All Resource Types configured in the application.
       operationId: GetResourceTypes
       parameters:
-       - name: ParentResourceType
+       - name: parent_resource_type
          in: query
          required: false
          description: Retrieves all resource types which falls under the given Parent Resource Type.
@@ -30,6 +30,8 @@ paths:
       responses:
         200:
           description: OK
+          schema:
+          $ref: '#/definitions/ResourceTypesResponse'
         default:
           description: Unexpected error
           schema:
@@ -90,6 +92,27 @@ paths:
           schema:
               $ref: '#/definitions/ErrorModel'
 definitions:
+  ResourceTypesResponse:
+    title: Resource Types
+    properties:
+      items:
+        type: array
+        uniqueItems: true
+        items:
+          $ref: "#/definitions/ResourceTypeResponse"
+  ResourceTypeResponse:
+   title: Resource Type
+   type: object
+   properties:
+     resourcetypeid:
+       type: string
+       description: ID of the resource type.
+     resourcetypename:
+       type: string
+       description: Name of the resource type.
+     parentresourcetypeid:
+       type: string
+       description: ID of the parent resource type.
   NewResourceType:
     type: object
     required:
