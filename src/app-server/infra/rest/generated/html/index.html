@@ -303,7 +303,7 @@ font-style: italic;
 
     <h3 class="field-label">Query parameters</h3>
     <div class="field-items">
-      <div class="param">ParentResourceType (optional)</div>
+      <div class="param">parent_resource_type (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Retrieves all resource types which falls under the given Parent Resource Type. </div>
     </div>  <!-- field-items -->
@@ -316,7 +316,7 @@ font-style: italic;
 
     <h3 class="field-label">Responses</h3>
     <h4 class="field-label">200</h4>
-    OK
+    
         <a href="#"></a>
     <h4 class="field-label">404</h4>
     Given Parent Resource Type not found in the system.
@@ -337,6 +337,8 @@ font-style: italic;
   <ol>
     <li><a href="#ErrorModel"><code>ErrorModel</code> - </a></li>
     <li><a href="#NewResourceType"><code>NewResourceType</code> - </a></li>
+    <li><a href="#ResourceTypeResponse"><code>ResourceTypeResponse</code> - Resource Type</a></li>
+    <li><a href="#ResourceTypesResponse"><code>ResourceTypesResponse</code> - Resource Types</a></li>
   </ol>
 
   <div class="model">
@@ -353,6 +355,22 @@ font-style: italic;
     <div class="field-items">
       <div class="param">resourceTypeName </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">parentResourceTypeName (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="ResourceTypeResponse"><code>ResourceTypeResponse</code> - Resource Type</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">resourcetypeid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> ID of the resource type. </div>
+<div class="param">resourcetypename (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Name of the resource type. </div>
+<div class="param">parentresourcetypeid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> ID of the parent resource type. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="ResourceTypesResponse"><code>ResourceTypesResponse</code> - Resource Types</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">items (optional)</div><div class="param-desc"><span class="param-type"><a href="#ResourceTypeResponse">array[ResourceTypeResponse]</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   </body>

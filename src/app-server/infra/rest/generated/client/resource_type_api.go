@@ -171,7 +171,7 @@ func (a *ResourceTypeApiService) GetResourceTypes(ctx context.Context, localVarO
 	}
 
 	if localVarTempParam, localVarOk := localVarOptionals["parentResourceType"].(string); localVarOk {
-		localVarQueryParams.Add("ParentResourceType", parameterToString(localVarTempParam, ""))
+		localVarQueryParams.Add("parent_resource_type", parameterToString(localVarTempParam, ""))
 	}
 	// to determine the Content-Type header
 	localVarHttpContentTypes := []string{  }
